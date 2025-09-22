@@ -38,6 +38,14 @@ func (h Handlers) Shorten(w http.ResponseWriter, r *http.Request) {
 	}
 
 	shortUrl := CreateShortURl(url.URL)
-	_ = shortUrl
+
+	err := h.db.Create(r.Context(), url.URL, shortUrl)
+	if err != nil {
+		return
+	}
+	err = json.NewEncoder(w).Encode(CreateShortURLRequest{URL: shortUrl})
+	if err != nil {
+		return
+	}
 
 }
