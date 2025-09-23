@@ -12,7 +12,7 @@ type Handlers struct {
 	db db.RepositoryInterface
 }
 
-type CreateShortURLRequest struct {
+type ToURl struct {
 	URL string `json:"url" validate:"required,url"`
 }
 
@@ -27,7 +27,7 @@ func NewHandler(db *db.Repository) Handlers {
 func (h Handlers) Shorten(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	var url CreateShortURLRequest
+	var url ToURl
 	if err := json.NewDecoder(r.Body).Decode(&url); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 	}
@@ -43,9 +43,30 @@ func (h Handlers) Shorten(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	err = json.NewEncoder(w).Encode(CreateShortURLRequest{URL: shortUrl})
+	err = json.NewEncoder(w).Encode(ToURl{URL: shortUrl})
 	if err != nil {
 		return
 	}
+
+}
+
+func (h Handlers) Redirect(w http.ResponseWriter, r *http.Request) {
+
+	w.Header().Set("Content-Type", "application/json")
+
+	var shortUrl ToURl
+
+	if err := json.NewDecoder(r.Body).Decode(&shortUrl); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+
+	}
+
+	fullUrl, err := h.db.Get(r.Context(), shortUrl.URL)
+	if err != nil {
+		http.Error(w, `{"error": "URL is not find"}`, http.StatusBadRequest)
+	}
+
+	http.Redirect(w, r, fullUrl, http.StatusFound)
 
 }
