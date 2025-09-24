@@ -11,7 +11,6 @@ import (
 	"github.com/ak-xen/URLShortener.git/config"
 	"github.com/ak-xen/URLShortener.git/internal/db"
 	"github.com/ak-xen/URLShortener.git/internal/handler"
-	"github.com/go-chi/chi"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -26,10 +25,9 @@ func main() {
 	slog.SetDefault(logger)
 	configDsn, _ := pgxpool.ParseConfig(config.GetDsn(cfg))
 	pool, err := pgxpool.NewWithConfig(ctx, configDsn)
-	rep := db.NewRepository(pool)
-	h := handler.NewHandler(rep)
-	_ = h
-	r := chi.NewRouter()
+	rep := db.NewRepository(pool, logger)
+	h := handler.NewHandler(rep, *cfg, logger)
+	r := handler.NewRouter(h, logger)
 	slog.Info("Starting server")
 	err = http.ListenAndServe(cfg.App.Port, r)
 	if err != nil {

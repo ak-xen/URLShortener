@@ -1,6 +1,6 @@
 app:
   name: "URLShortener"
-  base_url: "http://localhost:8080"
+  base_url: "http://localhost:8080/api"
   port: ":8080"
   env: "dev"
 
@@ -11,7 +11,7 @@ database:
   port: 5432
   user: "postgres"
   password: "iammiddle"
-  dbname: "mydb"
+  dbname: "urls"
   sslmode: "disable"
 
 
