@@ -14,6 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// TODO : to train for middleware creating
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
@@ -27,7 +28,7 @@ func main() {
 	pool, err := pgxpool.NewWithConfig(ctx, configDsn)
 	rep := db.NewRepository(pool, logger)
 	h := handler.NewHandler(rep, *cfg, logger)
-	r := handler.NewRouter(h, logger)
+	r := handler.NewRouter(h, logger, rep)
 	slog.Info("Starting server")
 	err = http.ListenAndServe(cfg.App.Port, r)
 	if err != nil {

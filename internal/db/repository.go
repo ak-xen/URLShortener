@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"log/slog"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -10,6 +11,7 @@ import (
 type RepositoryInterface interface {
 	Create(ctx context.Context, url string, shortURL string) error
 	Get(ctx context.Context, shortURL string) (string, error)
+	FindShortUrlInDb(ctx context.Context, shortURL string) (bool, error)
 }
 
 type Repository struct {
@@ -38,4 +40,15 @@ func (r *Repository) Get(ctx context.Context, shortURL string) (string, error) {
 		return "", err
 	}
 	return url, nil
+}
+
+func (r *Repository) FindShortUrlInDb(ctx context.Context, shortUrl string) (bool, error) {
+	var ans bool
+	findUrl := strings.Split(shortUrl, "/")[2]
+	err := r.pool.QueryRow(ctx, "SELECT EXISTS(SELECT 1 FROM urls WHERE short_code=$1)", findUrl).Scan(&ans)
+	if err != nil {
+		return false, err
+	}
+	return ans, nil
+
 }
