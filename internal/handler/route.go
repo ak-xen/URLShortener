@@ -12,14 +12,16 @@ import (
 func NewRouter(h Handlers, logger *slog.Logger, repository db.RepositoryInterface) *chi.Mux {
 	r := chi.NewRouter()
 	middlewareLogger := RequestLogger(logger)
+	mwCors := MiddlewareCors()
 	// Подключаем стандартные middleware
 	r.Use(middlewareLogger)
 	r.Use(middleware.Recoverer)
+	r.Use(mwCors)
 
 	// Разделяем маршруты по группам
 	r.Route("/api", func(r chi.Router) {
 		r.Post("/v1", h.Shorten)
-		r.With(IfExistShortUrl(repository)).Get("/{shorten_url}", h.Redirect)
+		r.With(MWIfExistShortUrl(repository)).Get("/{shorten_url}", h.Redirect)
 	})
 
 	return r

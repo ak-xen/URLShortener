@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form id="myForm">
+    <label for="large_url">Url users:</label>
+    <input type="url" name="url" id="large_url">
+    <button type="submit">Send form</button>
+</form>
+
+<script>
+    const form = document.getElementById("myForm");
+
+    form.addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const formData = new FormData(form);
+      const jsonData = {};
+
+      formData.forEach((value, key) => {
+        jsonData[key] = value;
+      });
+
+      fetch("http://localhost:8080/api/v1", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(jsonData)
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log("Ответ сервера:", data);
+        alert("Форма успешно отправлена!");
+      })
+      .catch(error => {
+        console.error("Ошибка:", error);
+      });
+    });
+</script>
+</body>
+</html>

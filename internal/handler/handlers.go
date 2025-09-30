@@ -33,9 +33,11 @@ func (h Handlers) Shorten(w http.ResponseWriter, r *http.Request) {
 
 	var url ToURl
 	if err := json.NewDecoder(r.Body).Decode(&url); err != nil {
+		fmt.Println(url)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
 	if !IsValidate(url.URL) {
 		http.Error(w, `{"error": "URL is required"}`, http.StatusBadRequest)
 		return
