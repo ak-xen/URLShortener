@@ -50,18 +50,14 @@ func (h Handlers) Shorten(w http.ResponseWriter, r *http.Request) {
 
 	baseUrl := h.cfg.App.BaseURL
 	shortCode := CreateShortURl(url.URL)
-	ch := make(chan error)
-	go func() {
-		err := h.db.Create(r.Context(), url.URL, shortCode)
-		ch <- err
-
-	}()
-	if err := <-ch; err != nil {
-		h.logger.Error("Query to db", err)
+	err := h.db.Create(r.Context(), url.URL, shortCode)
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
 	w.WriteHeader(http.StatusCreated)
 
-	err := json.NewEncoder(w).Encode(ToURl{URL: baseUrl + "/" + shortCode})
+	err = json.NewEncoder(w).Encode(ToURl{URL: baseUrl + "/" + shortCode})
 	if err != nil {
 		return
 	}

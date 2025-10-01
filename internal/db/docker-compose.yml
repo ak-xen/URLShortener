@@ -1,0 +1,18 @@
+
+
+services:
+  db:
+    image: postgres:17
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: iammiddle
+      POSTGRES_DB: urls
+    ports:
+      - "5432:5432" # проброс наружу, чтобы твой Go код мог подключиться
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
