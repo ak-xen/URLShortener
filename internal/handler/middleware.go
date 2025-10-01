@@ -34,7 +34,7 @@ func MWIfExistShortUrl(rep db.RepositoryInterface) func(next http.Handler) http.
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			requestUrl := r.URL.Path
-			answer, _ := rep.FindShortUrlInDb(r.Context(), requestUrl)
+			answer, _ := rep.IsShortUrlInDb(r.Context(), requestUrl)
 			if answer != true {
 				http.Error(w, `{"error": "Not find short Url"}`, http.StatusBadRequest)
 			}

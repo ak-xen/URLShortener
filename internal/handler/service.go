@@ -3,6 +3,7 @@ package handler
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"net/http"
 	"net/url"
 )
 
@@ -36,4 +37,21 @@ func CreateShortURl(inputUrl string) string {
 
 	return base64.URLEncoding.WithPadding(base64.NoPadding).EncodeToString(b)
 
+}
+
+func IfUrlExistInDb(h Handlers, w http.ResponseWriter, r *http.Request, url string) bool {
+	if ok, _ := h.db.IsLargeUrlInDb(r.Context(), url); ok {
+		shortCode := h.db.GetShortCode(r.Context(), url)
+		fullUrl, err := h.db.Get(r.Context(), shortCode)
+
+		if err != nil {
+
+			http.Error(w, `{"error": "URL is not find"}`, http.StatusBadRequest)
+			return false
+		}
+
+		http.Redirect(w, r, fullUrl, http.StatusFound)
+		return true
+	}
+	return false
 }

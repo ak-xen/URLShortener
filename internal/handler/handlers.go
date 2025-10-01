@@ -33,7 +33,6 @@ func (h Handlers) Shorten(w http.ResponseWriter, r *http.Request) {
 
 	var url ToURl
 	if err := json.NewDecoder(r.Body).Decode(&url); err != nil {
-		fmt.Println(url)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -42,10 +41,14 @@ func (h Handlers) Shorten(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, `{"error": "URL is required"}`, http.StatusBadRequest)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
+
+	if IfUrlExistInDb(h, w, r, url.URL) {
+		return
+	}
+
 	baseUrl := h.cfg.App.BaseURL
 	shortCode := CreateShortURl(url.URL)
-
-	w.Header().Set("Content-Type", "application/json")
 
 	err := h.db.Create(r.Context(), url.URL, shortCode)
 	if err != nil {
