@@ -14,7 +14,6 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-// TODO : to train for middleware creating
 func main() {
 	cfg, err := config.Load()
 	if err != nil {

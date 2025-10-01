@@ -40,17 +40,26 @@ func CreateShortURl(inputUrl string) string {
 }
 
 func IfUrlExistInDb(h Handlers, w http.ResponseWriter, r *http.Request, url string) bool {
+	ch := make(chan string)
+	fullUrlCh := make(chan string)
 	if ok, _ := h.db.IsLargeUrlInDb(r.Context(), url); ok {
-		shortCode := h.db.GetShortCode(r.Context(), url)
-		fullUrl, err := h.db.Get(r.Context(), shortCode)
+		go func() {
+			shortCode := h.db.GetShortCode(r.Context(), url)
+			ch <- shortCode
+		}()
 
-		if err != nil {
+		go func() {
+			fullUrl, err := h.db.Get(r.Context(), <-ch)
+			if err != nil {
 
-			http.Error(w, `{"error": "URL is not find"}`, http.StatusBadRequest)
-			return false
-		}
+				http.Error(w, `{"error": "URL is not find"}`, http.StatusBadRequest)
+				return
+			}
+			fullUrlCh <- fullUrl
 
-		http.Redirect(w, r, fullUrl, http.StatusFound)
+		}()
+
+		http.Redirect(w, r, <-fullUrlCh, http.StatusFound)
 		return true
 	}
 	return false

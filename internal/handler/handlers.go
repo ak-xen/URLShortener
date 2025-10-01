@@ -43,6 +43,7 @@ func (h Handlers) Shorten(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 
+	//This func redirect user if url exsit in db
 	if IfUrlExistInDb(h, w, r, url.URL) {
 		return
 	}
