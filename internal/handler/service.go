@@ -49,13 +49,7 @@ func IfUrlExistInDb(h Handlers, w http.ResponseWriter, r *http.Request, url stri
 		}()
 
 		go func() {
-			fullUrl, err := h.db.Get(r.Context(), <-ch)
-			if err != nil {
-
-				http.Error(w, `{"error": "URL is not find"}`, http.StatusBadRequest)
-				return
-			}
-			fullUrlCh <- fullUrl
+			h.db.Get(r.Context(), <-ch, fullUrlCh)
 
 		}()
 
