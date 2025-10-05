@@ -10,7 +10,7 @@ import (
 
 type RepositoryInterface interface {
 	Create(ctx context.Context, url string, shortURL string) error
-	Get(ctx context.Context, shortURL string, fullUrl chan string)
+	Get(ctx context.Context, shortURL string) (string, error)
 	IsShortUrlInDb(ctx context.Context, shortURL string) (bool, error)
 	IsLargeUrlInDb(ctx context.Context, originalUrl string) (bool, error)
 	GetShortCode(ctx context.Context, originalUrl string) string
@@ -34,14 +34,15 @@ func (r *Repository) Create(ctx context.Context, url string, shortURL string) er
 
 }
 
-func (r *Repository) Get(ctx context.Context, shortURL string, fullUrl chan string) {
+func (r *Repository) Get(ctx context.Context, shortURL string) (string, error) {
 	var url string
 	err := r.pool.QueryRow(ctx, `SELECT original_url FROM urls WHERE short_code=$1`, shortURL).Scan(&url)
 	if err != nil {
 		r.logger.Info("err query", '\n', "err", err)
 
+		return "", err
 	}
-	fullUrl <- url
+	return url, nil
 }
 
 func (r *Repository) IsShortUrlInDb(ctx context.Context, shortUrl string) (bool, error) {

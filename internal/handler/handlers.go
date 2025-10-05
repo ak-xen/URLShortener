@@ -74,9 +74,14 @@ func (h Handlers) Redirect(w http.ResponseWriter, r *http.Request) {
 	var shortUrl ToURl
 
 	shortUrl.URL = chi.URLParam(r, "shorten_url")
-	fullUrl := make(chan string)
-	go h.db.Get(r.Context(), shortUrl.URL, fullUrl)
-	url := <-fullUrl
-	http.Redirect(w, r, url, http.StatusFound)
+
+	fullUrl, err := h.db.Get(r.Context(), shortUrl.URL)
+
+	if err != nil {
+
+		http.Error(w, `{"error": "URL is not find"}`, http.StatusBadRequest)
+	}
+
+	http.Redirect(w, r, fullUrl, http.StatusFound)
 
 }
